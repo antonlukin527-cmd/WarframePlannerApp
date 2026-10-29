@@ -1,4 +1,41 @@
-document.addEventListener('DOMContentLoaded', () => {
+// Мы оборачиваем всё в асинхронную функцию, чтобы сначала загрузить данные
+document.addEventListener('DOMContentLoaded', async () => {
+  
+  // Функция для безопасной загрузки JSON
+  const fetchJson = async (filename) => {
+    try {
+      const response = await fetch(`data/json/${filename}.json`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (e) {
+      console.error(`❌ Ошибка загрузки ${filename}.json:`, e);
+      return []; // Возвращаем пустой массив, чтобы приложение не упало
+    }
+  };
+
+  console.log("⏳ Загрузка баз данных...");
+
+  // Загружаем все файлы (имена должны совпадать с теми, что в папке data/json)
+  window.WF_PRIMARY = await fetchJson('primary_data');
+  window.WF_SECONDARY = await fetchJson('secondary_data');
+  window.WF_MELEE = await fetchJson('melee_data');
+  window.WF_SENTINELWEAPONS = await fetchJson('sentinelweapons_data');
+  window.WF_ARCHGUN = await fetchJson('archgun_data');
+  window.WF_ARCHMELEE = await fetchJson('archmelee_data');
+  window.WF_AMPS = await fetchJson('amps_data');
+  window.WF_NECRAMECH = await fetchJson('necramech_data');
+  window.WF_WARFRAMES = await fetchJson('warframes_data');
+  window.WF_MODS = await fetchJson('mods_data');
+  window.WF_PETS = await fetchJson('pets_data');
+  window.WF_SENTINELS = await fetchJson('sentinels_data');
+  window.WF_ARCANES = await fetchJson('arcanes_data');
+  window.WF_RELICS = await fetchJson('relics_data');
+
+  console.log("✅ Данные загружены. Запуск приложения...");
+
+  // === ДАЛЬШЕ ИДЕТ ВАШ СТАРЫЙ КОД ИЗ INIT.JS ===
+  // (То, что раньше было внутри DOMContentLoaded)
+  
   const pushData = (t, s) => { if (!s) return; if (Array.isArray(s)) t.push(...s); else t.push(s); };
   pushData(allWeapons, window.WF_PRIMARY);
   pushData(allWeapons, window.WF_SECONDARY);
@@ -8,11 +45,13 @@ document.addEventListener('DOMContentLoaded', () => {
   pushData(allWeapons, window.WF_ARCHMELEE);
   pushData(allWeapons, window.WF_AMPS);
   pushData(allWeapons, window.WF_NECRAMECH);
+  
   if (window.WF_WARFRAMES) warframesData = window.WF_WARFRAMES;
   if (window.WF_MODS) modsData = window.WF_MODS;
   pushData(companionsData, window.WF_PETS);
   pushData(companionsData, window.WF_SENTINELS);
 
+  // Ручное добавление оружия (если нужно)
   const manualWeapons = [
     {name:"Vinquibus",type:"Primary",subType:"Bayonet",tier:"A",desc:"Оружие Уриила.",imageName:"Vinquibus.png",masteryRank:14,damage:400,critChance:40.0,statusChance:20.0},
     {name:"Catchmoon",type:"Secondary",subType:"Kitgun",tier:"A",desc:"Китган.",imageName:"Catchmoon.png",masteryRank:0,damage:260,critChance:26.0,statusChance:14.0},
@@ -46,43 +85,32 @@ document.addEventListener('DOMContentLoaded', () => {
   const mc = document.getElementById('modsCount');
   if (mc) mc.textContent = modsData.length;
 
-  // Безопасный запуск базовых модулей
+  // Безопасный запуск
   try { populateShardSelects(); } catch(e) { console.error('Ошибка осколков', e); }
   try { renderBuilds(); } catch(e) { console.error('Ошибка билдов', e); }
+  try { renderOperator(); } catch(e) { console.error('Ошибка оператора', e); }
   try { renderShards(); } catch(e) { console.error('Ошибка рендера осколков', e); }
   try { renderDatabase(); } catch(e) { console.error('Ошибка базы данных', e); }
   try { renderMechanics(); } catch(e) { console.error('Ошибка механик', e); }
-  
-  // Безопасный запуск калькулятора и ривейнов
   try { populateCalcSelect(); } catch(e) { console.error('Ошибка калькулятора', e); }
   try { initRivenWeaponList(); } catch(e) { console.error('Ошибка списка ривейнов', e); }
+  
   if (document.getElementById('calc_riven_builder')) {
       try { renderCalcRivenBuilder(); } catch(e) { console.error('Ошибка Riven Builder', e); }
   }
-
-  // Безопасный запуск новых модулей
-  if (typeof renderOperator === 'function') {
-      try { renderOperator(); } catch(e) { console.error('Ошибка Оператора', e); }
-  }
-  if (document.getElementById('build_market_toolbar')) {
-      try { renderMarketSummaryUI(); } catch(e) { console.error('Ошибка Market UI', e); }
-  }
-  if (typeof updateCapacity === 'function') {
-      try { updateCapacity(); } catch(e) { console.error('Ошибка Capacity', e); }
-  }
-
-  // Первичный расчет калькулятора
-  try { calculate(); } catch(e) { console.error(e); }
-  try { calculateArmor(); } catch(e) { console.error(e); }
-  try { calculateSurvivability(); } catch(e) { console.error(e); }
-  // ... (верхняя часть файла без изменений)
 
   // Инициализация новых модулей (Инструменты, Компаньоны)
   if (typeof initIncarnonTracker === 'function') initIncarnonTracker();
   if (typeof initZawBuilder === 'function') initZawBuilder();
   if (typeof renderCompanionMods === 'function') renderCompanionMods();
+  if (typeof renderRelics === 'function') { try { renderRelics(); } catch(e) { console.error('Ошибка рендера реликвий', e); } }
+  if (typeof applyThemeSettings === 'function') applyThemeSettings();
+
+  try { calculate(); } catch(e) { console.error(e); }
+  try { calculateArmor(); } catch(e) { console.error(e); }
+  try { calculateSurvivability(); } catch(e) { console.error(e); }
+  
+  try { updateCapacity(); } catch(e) { console.error('Ошибка Capacity', e); }
 
   console.log('✅ WF Planner loaded. Weapons:', allWeapons.length, 'Warframes:', warframesData.length, 'Mods:', modsData.length);
 });
-
-  
