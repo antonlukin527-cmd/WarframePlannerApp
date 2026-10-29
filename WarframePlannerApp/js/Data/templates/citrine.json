@@ -1,0 +1,57 @@
+{
+  "id": "citrine_ninjase_patch440",
+  "metadata": {
+    "frame": "Citrine Prime",
+    "author": "nvrLackkin17 (ninjase build)",
+    "patchVersion": "44.0",
+    "status": "outdated",
+    "statusNotes": "Билд обновлён до патча 44.0. Механики Citrine не менялись в 44.3, но синергии оружия стоит перепроверить.",
+    "role": "Support / Weapon Platform",
+    "targetContent": "Steel Path / Squad Support",
+    "description": "Citrine — кристаллический варфрейм поддержки. Prismatic Gem накладывает статусы и усиливает союзников. Preserving Shell даёт снижение урона. Билд балансирует силу способностей, длительность и выживание."
+  },
+  "loadout": {
+    "aura": { "name": "Corrosive Projection", "polarity": "naramon" },
+    "exilus": { "name": "Ice Spring", "polarity": "naramon" },
+    "helminth": {
+      "recommended": ["Roar"],
+      "notes": "Roar заменяет Preserving Shell. Даёт бафф урона для себя и союзников."
+    },
+    "coreMods": [
+      { "name": "Recrystalize", "polarity": "vazarin", "rank": "max", "notes": "Аугмент: убитые кристаллами враги распространяют кристаллы на других." },
+      { "name": "Equilibrium", "polarity": "vazarin", "rank": "max" },
+      { "name": "Prismatic Companion", "polarity": "vazarin", "rank": "max", "notes": "Аугмент: Prismatic Gem крепится к компаньону, +50% длительности." },
+      { "name": "Blind Rage", "polarity": "madurai", "rank": "max" },
+      { "name": "Primed Flow", "polarity": "naramon", "rank": "max" },
+      { "name": "Archon Continuity", "polarity": "naramon", "rank": "max" },
+      { "name": "Archon Stretch", "polarity": "vazarin", "rank": "max" },
+      { "name": "Catalyzing Shields", "polarity": "naramon", "rank": "max" }
+    ],
+    "arcanes": [
+      { "name": "Arcane Impetus", "rank": "max", "notes": "Уникальные статусы от способностей дают силу и эффективность." },
+      { "name": "Molt Augmented", "rank": "max", "notes": "Убийства дают +0.24% силы способностей, до 250 стаков." }
+    ],
+    "shards": [
+      { "color": "Emerald", "effect": "Ability Damage on Corroded Enemies", "tauforged": true, "notes": "2-3 изумрудных осколка для усиления урона по врагам с коррозией." },
+      { "color": "Crimson", "effect": "Ability Strength", "tauforged": false }
+    ]
+  },
+  "synergies": {
+    "weaponPlatform": {
+      "target": "Primary",
+      "recommendedWeapons": [
+        { "name": "Bubonico", "reason": "Альт-огонь с токсином имеет пассивную длительность статуса 15 сек, которую Citrine может усилить до 30+ сек через 3-ю способность." },
+        { "name": "Epitaph", "reason": "Быстрое наложение статусов для активации Growing Power и прайминга." }
+      ]
+    },
+    "survivability": {
+      "method": "Shield Gating + Preserving Shell",
+      "mechanics": "Catalyzing Shields для гейта. Preserving Shell даёт снижение урона, которое поддерживается убийствами. При использовании Helminth (Roar) полагается на гейт."
+    }
+  },
+  "companionSynergy": {
+    "recommended": "Wyrm Prime / Huras Kubrow",
+    "keyMods": ["Reinforced Bond", "Tenacious Bond", "Augur mods on Sentinel weapon"],
+    "notes": "С Prismatic Companion аугментом гем крепится к компаньону, поэтому компаньон должен быть живучим. Bond-моды дают баффы крита и скорострельности."
+  }
+}

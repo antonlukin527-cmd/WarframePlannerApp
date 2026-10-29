@@ -1,0 +1,1 @@
+window.WF_AMPS = [];
