@@ -1,4 +1,4 @@
-window.WF_RELICS = [ 
+ [ 
     {
         "name": "Axi A1",
         "rewards": [
@@ -21398,4 +21398,4 @@ window.WF_RELICS = [
             "urlName": "neo_z3_intact"
         }
     }
-];
+]
