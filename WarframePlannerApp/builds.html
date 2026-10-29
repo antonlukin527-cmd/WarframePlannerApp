@@ -16,6 +16,7 @@
   <button class="tab" onclick="switchTab('calc', this)">Калькулятор</button>
   <button class="tab" onclick="switchTab('rivens', this)">Моды разлома</button>
   <button class="tab" onclick="switchTab('tools', this)">Инструменты</button>
+  <button class="tab" onclick="switchTab('relics', this)">Реликвии</button>
   <button class="tab" onclick="switchTab('companions', this)">Компаньоны</button>
   <button class="tab" onclick="switchTab('database', this)">База данных</button>
   <button class="tab" onclick="switchTab('shards', this)">Осколки</button>
@@ -62,37 +63,55 @@
   </div>
 </div>
 
-<!-- ИНСТРУМЕНТЫ (Хелминт, Инкарнон, Зо/Китганы) -->
+<!-- ИНСТРУМЕНТЫ -->
 <div class="panel" id="panel-tools">
   <div class="inner-tabs" style="margin-bottom: 15px;">
     <button class="itab active" onclick="switchToolsTab('helminth', this)">Хелминт</button>
     <button class="itab" onclick="switchToolsTab('incarnon', this)">Инкарнон</button>
     <button class="itab" onclick="switchToolsTab('zaw', this)">Зо и Китганы</button>
   </div>
-  
   <div class="itab-panel active" id="tools-tab-helminth">
     <div class="calc-box"><h3>Справочник способностей Хелминта</h3><div class="ref-grid" id="helminthGrid"></div></div>
   </div>
-  
   <div class="itab-panel" id="tools-tab-incarnon">
     <div class="calc-box">
       <h3>Трекер эволюций Инкарнона</h3>
-      <p style="color:var(--dim); font-size:12px; margin-bottom:15px;">Выберите оружие, чтобы увидеть рекомендуемые эволюции.</p>
       <select id="incarnon_weapon_select" onchange="renderIncarnonEvolutions()" style="width:100%; margin-bottom:15px;"></select>
       <div id="incarnon_result" class="calc-result"></div>
     </div>
   </div>
-
   <div class="itab-panel" id="tools-tab-zaw">
     <div class="calc-box">
       <h3>Конструктор Зо и Китганов</h3>
       <div class="calc-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-bottom:15px;">
-        <div><label>Тип (Стойка / Ствол)</label><select id="zaw_strike" onchange="calculateZaw()" style="width:100%"></select></div>
-        <div><label>Рукоять / Заряд</label><select id="zaw_grip" onchange="calculateZaw()" style="width:100%"></select></div>
-        <div><label>Связка / Линза</label><select id="zaw_link" onchange="calculateZaw()" style="width:100%"></select></div>
+        <div><label>Тип (Стойка)</label><select id="zaw_strike" onchange="calculateZaw()" style="width:100%"></select></div>
+        <div><label>Рукоять</label><select id="zaw_grip" onchange="calculateZaw()" style="width:100%"></select></div>
+        <div><label>Связка</label><select id="zaw_link" onchange="calculateZaw()" style="width:100%"></select></div>
       </div>
       <div class="calc-result" id="zaw_result"></div>
     </div>
+  </div>
+</div>
+
+<!-- РЕЛИКВИИ -->
+<div class="panel" id="panel-relics">
+  <div class="calc-box">
+    <h3>📦 Планировщик фарма Прайм-частей</h3>
+    <div class="filters" style="margin-bottom:15px; display:flex; gap:10px; flex-wrap:wrap;">
+      <input id="relic_search" placeholder="Поиск по предмету (например, Ash Prime)..." oninput="renderRelics()" style="flex:1; min-width:200px;">
+      <select id="relic_era" onchange="renderRelics()" style="width:150px;">
+        <option value="all">Все эпохи</option>
+        <option value="Lith">Lith (Лит)</option>
+        <option value="Meso">Meso (Мезо)</option>
+        <option value="Neo">Neo (Нео)</option>
+        <option value="Axi">Axi (Акси)</option>
+        <option value="Requiem">Requiem (Реквием)</option>
+      </select>
+      <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:12px;">
+        <input type="checkbox" id="relic_vaulted" onchange="renderRelics()"> Скрыть из хранилища
+      </label>
+    </div>
+    <div class="ref-grid" id="relicsGrid"></div>
   </div>
 </div>
 
@@ -113,13 +132,6 @@
       <h5>Моды компаньона (В разработке)</h5>
       <div class="mod-tags" id="tags_companion"></div>
     </div>
-    <div class="mod-group">
-      <h5>Оружие компаньона</h5>
-      <div class="field-with-btn">
-        <input id="comp_weapon_name" placeholder="Оружие стража/питомца">
-        <button class="btn-pick" onclick="openPicker('SentinelWeapon')">Выбрать</button>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -135,50 +147,24 @@
   <div class="itab-panel active" id="calc-tab-dmg">
     <div class="calc-box">
       <h3>Калькулятор урона и ДПС</h3>
-      
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:15px;">
-        <div><label>Билд</label>
-          <select id="calc_build_select" onchange="loadBuildForCalc()" style="width:100%"><option value="-1">-- Ручной ввод --</option></select>
-        </div>
-        <div><label>Слот оружия</label>
-          <select id="calc_weapon_slot" onchange="loadBuildForCalc()" style="width:100%">
-            <option value="primary">Основное</option><option value="secondary">Вторичное</option><option value="melee">Ближний бой</option>
-          </select>
-        </div>
-        <div><label>Фракция</label>
-          <select id="calc_faction" onchange="calculate()" style="width:100%">
-            <option value="1.0">Без бонуса</option><option value="1.5">Grineer (+50%)</option><option value="1.5">Corpus (+50%)</option><option value="1.5">Infested (+50%)</option><option value="1.5">Scaldra (+50%)</option>
-          </select>
-        </div>
+        <div><label>Билд</label><select id="calc_build_select" onchange="loadBuildForCalc()" style="width:100%"><option value="-1">-- Ручной ввод --</option></select></div>
+        <div><label>Слот оружия</label><select id="calc_weapon_slot" onchange="loadBuildForCalc()" style="width:100%"><option value="primary">Основное</option><option value="secondary">Вторичное</option><option value="melee">Ближний бой</option></select></div>
+        <div><label>Фракция</label><select id="calc_faction" onchange="calculate()" style="width:100%"><option value="1.0">Без бонуса</option><option value="1.5">Grineer (+50%)</option><option value="1.5">Corpus (+50%)</option><option value="1.5">Infested (+50%)</option><option value="1.5">Scaldra (+50%)</option></select></div>
       </div>
-      
       <div class="mod-group" style="display:none" id="calc_mods_group">
         <h5>Моды оружия <button class="btn-pick" onclick="editCalcMods()">✏ Ред.</button></h5>
         <div class="mod-tags" id="calc_mods_tags"></div>
       </div>
-
       <div style="background:var(--panel3); padding:12px; border-radius:8px; margin-bottom:15px; border-left:3px solid var(--warn);">
         <h4 style="color:var(--warn); font-size:13px; margin:0 0 10px 0;">🎯 Параметры врага (Скейлинг 9999)</h4>
         <div class="calc-grid" style="grid-template-columns: 1fr 1fr 1fr auto; align-items:end;">
-          <div>
-            <label>Тип врага</label>
-            <select id="enemy_type" onchange="calculate()" style="width:100%">
-              <optgroup label="Grineer"><option value="heavy_gunner">Heavy Gunner</option><option value="bombard">Bombard</option></optgroup>
-              <optgroup label="Corpus"><option value="tech">Tech</option><option value="crewman">Crewman</option></optgroup>
-              <optgroup label="Infested"><option value="ancient_healer">Ancient Healer</option></optgroup>
-              <optgroup label="Murmur"><option value="murmur_warden">Severed Warden</option></optgroup>
-            </select>
-          </div>
+          <div><label>Тип врага</label><select id="enemy_type" onchange="calculate()" style="width:100%"><optgroup label="Grineer"><option value="heavy_gunner">Heavy Gunner</option><option value="bombard">Bombard</option></optgroup><optgroup label="Corpus"><option value="tech">Tech</option><option value="crewman">Crewman</option></optgroup><optgroup label="Infested"><option value="ancient_healer">Ancient Healer</option></optgroup><optgroup label="Murmur"><option value="murmur_warden">Severed Warden</option></optgroup></select></div>
           <div><label>Уровень врага</label><input type="number" id="enemy_level" value="100" min="1" max="9999" oninput="calculate()"></div>
-          <div style="display:flex; align-items:center; height:100%;">
-            <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:bold; color:var(--accent);">
-              <input type="checkbox" id="enemy_steel_path" onchange="calculate()"> Стальной Путь
-            </label>
-          </div>
+          <div style="display:flex; align-items:center; height:100%;"><label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:bold; color:var(--accent);"><input type="checkbox" id="enemy_steel_path" onchange="calculate()"> Стальной Путь</label></div>
         </div>
         <div id="enemy_stats_display" style="margin-top:10px; font-size:12px; color:var(--dim); display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; text-align:center;"></div>
       </div>
-
       <h4 style="color:var(--accent);font-size:13px;margin:15px 0 5px">Базовые статы оружия:</h4>
       <div class="calc-grid">
         <div><label>Базовый урон</label><input type="number" id="calc_base" value="100" oninput="calculate()"></div>
@@ -187,16 +173,11 @@
         <div><label>Базовый крит. множитель</label><input type="number" id="calc_base_critdmg" value="2.0" step="0.1" oninput="calculate()"></div>
         <div><label>Базовый шанс статуса %</label><input type="number" id="calc_base_status" value="20" oninput="calculate()"></div>
         <div><label>Множитель от сноса брони</label><input type="number" id="calc_armor_mult" value="1.0" step="0.01" oninput="calculate()"></div>
-
         <div style="grid-column: 1 / -1; background:var(--panel3); padding:12px; border-radius:8px; margin-top:10px; border-left: 3px solid var(--warn);">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <h5 style="color:var(--warn); font-size:13px; margin:0;">Мод Разлома (Ривейн) в билде</h5>
-            <button class="btn-sm" onclick="clearRivenCalc()" style="background:var(--panel); font-size:11px;">Очистить</button>
-          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><h5 style="color:var(--warn); font-size:13px; margin:0;">Мод Разлома (Ривейн) в билде</h5><button class="btn-sm" onclick="clearRivenCalc()" style="background:var(--panel); font-size:11px;">Очистить</button></div>
           <div id="calc_riven_builder" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"></div>
         </div>
       </div>
-
       <h4 style="color:var(--accent);font-size:13px;margin:15px 0 5px">Уровни модов:</h4>
       <div class="calc-grid">
         <div><label>Serration (+Урон)</label><select id="rank_dmg" onchange="calculate()" style="width:100%"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></div>
@@ -208,7 +189,6 @@
         <div><label>Vital Sense (+Крит урон)</label><select id="rank_critdmg" onchange="calculate()" style="width:100%"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div>
         <div><label>Hammer Shot (+Крит урон)</label><select id="rank_hammer_shot" onchange="calculate()" style="width:100%"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
       </div>
-
       <h4 style="color:var(--accent);font-size:13px;margin:15px 0 5px">Баффы и дебаффы:</h4>
       <div class="buffs-grid">
         <label><input type="checkbox" id="calc_roar" onchange="calculate()"> Roar (+50%)</label>
@@ -220,7 +200,6 @@
         <label><input type="checkbox" id="calc_viral" onchange="calculate()"> 10 стаков Вируса (x3.25)</label>
         <label><input type="checkbox" id="calc_corrosive" onchange="calculate()"> Коррозия (-80% брони)</label>
       </div>
-      
       <button class="btn-pick" onclick="copyCalcToClipboard()" style="margin: 15px 0 8px; display:block; width:100%;">📋 Скопировать расчёт</button>
       <div class="calc-result" id="calc_result"></div>
     </div>
@@ -231,11 +210,7 @@
       <h3>🛡️ Калькулятор снижения брони</h3>
       <div class="calc-grid" style="grid-template-columns: 1fr 1fr 1fr 1fr; margin-bottom:15px;">
         <div><label>Базовая броня</label><input type="number" id="armor_base" value="1000" oninput="calculateArmor()"></div>
-        <div><label>Тип снижения</label>
-          <select id="armor_type" onchange="calculateArmor()" style="width:100%">
-            <option value="base_percent">% базовой (аддитивно)</option><option value="current_percent">% текущей (мультипликативно)</option><option value="current_flat">−X ед. текущей</option><option value="base_flat">−X ед. базовой</option>
-          </select>
-        </div>
+        <div><label>Тип снижения</label><select id="armor_type" onchange="calculateArmor()" style="width:100%"><option value="base_percent">% базовой (аддитивно)</option><option value="current_percent">% текущей (мультипликативно)</option><option value="current_flat">−X ед. текущей</option><option value="base_flat">−X ед. базовой</option></select></div>
         <div><label>Значение</label><input type="number" id="armor_value" value="50" oninput="calculateArmor()"></div>
         <div><label>Применений</label><input type="number" id="armor_applications" value="1" min="1" oninput="calculateArmor()"></div>
       </div>
@@ -274,16 +249,8 @@
   <div class="calc-box">
     <h3>🔍 Анализ оружия для Ривинов</h3>
     <div class="calc-grid" style="grid-template-columns: 2fr 1fr; gap:10px; margin-bottom:20px;">
-      <div>
-        <label>Выбор оружия</label>
-        <div class="field-with-btn">
-          <input type="text" id="riven_weapon_search" list="riven_weapon_list" placeholder="Введите название оружия..." onchange="analyzeWeaponForRiven()">
-          <datalist id="riven_weapon_list"></datalist>
-        </div>
-      </div>
-      <div style="display:flex; align-items:flex-end;">
-        <button class="btn-p" style="width:100%;" onclick="analyzeWeaponForRiven()">Анализировать</button>
-      </div>
+      <div><label>Выбор оружия</label><div class="field-with-btn"><input type="text" id="riven_weapon_search" list="riven_weapon_list" placeholder="Введите название оружия..." onchange="analyzeWeaponForRiven()"><datalist id="riven_weapon_list"></datalist></div></div>
+      <div style="display:flex; align-items:flex-end;"><button class="btn-p" style="width:100%;" onclick="analyzeWeaponForRiven()">Анализировать</button></div>
     </div>
     <div id="riven_analysis_result" class="calc-result" style="display:none; border-left-color: var(--warn);"></div>
   </div>
@@ -310,10 +277,7 @@
 
 <!-- МЕХАНИКИ -->
 <div class="panel" id="panel-mechanics">
-  <div class="calc-box">
-    <h3>Шпаргалка по механикам</h3>
-    <div class="ref-grid" id="mechanicsGrid"></div>
-  </div>
+  <div class="calc-box"><h3>Шпаргалка по механикам</h3><div class="ref-grid" id="mechanicsGrid"></div></div>
 </div>
 
 <!-- МОДАЛКА РЕДАКТОРА -->
@@ -325,7 +289,6 @@
       <button class="itab" onclick="switchInnerTab('weapon',this)">2. Оружие и Моды</button>
       <button class="itab" onclick="switchInnerTab('shards',this)">3. Осколки</button>
     </div>
-
     <div class="itab-panel active" id="itab-frame">
       <div class="grid3" style="background:var(--panel3);padding:10px;border-radius:8px;margin-bottom:12px">
         <div><label>Режим</label><select id="edit_smart_mode" onchange="updateSmartRoles()" style="width:100%"><option value="">-- Режим --</option><option value="cascade">Каскад Бездны 9999</option><option value="arbitration">Арбитраж</option></select></div>
@@ -338,15 +301,7 @@
         <div><label>Роль</label><select id="edit_role"><option>Damage</option><option>Support</option><option>Tank</option></select></div>
         <div><label>Режим игры</label><select id="edit_mission_type" style="width:100%"><option value="normal">Обычные миссии (Обычка)</option><option value="arbitration">Арбитраж</option><option value="steel_path">Стальной путь</option><option value="sp_9999">Кап 9999 (Стальной путь)</option></select></div>
         <div><label>Компаньон</label><div class="field-with-btn"><input id="edit_comp" placeholder="Nautilus"><button class="btn-pick" onclick="openPicker('companion')">Выбрать</button></div></div>
-        
-        <div>
-          <label>Helminth</label>
-          <div class="field-with-btn">
-            <input id="edit_helminth" list="helminth_list" placeholder="Roar, Gloom...">
-            <button class="btn-pick" onclick="openHelminthGuide()">📖 Справочник</button>
-          </div>
-        </div>
-
+        <div><label>Helminth</label><div class="field-with-btn"><input id="edit_helminth" list="helminth_list" placeholder="Roar, Gloom..."><button class="btn-pick" onclick="openHelminthGuide()">📖 Справочник</button></div></div>
         <div><label>Аркан Варфрейма (Слот 1)</label><div class="field-with-btn"><input id="edit_arcane_frame" list="arcane_frame_list" placeholder="Arcane Energize..."><button class="btn-auto" onclick="autoPickArcanes('frame')">🎲 Авто</button></div></div>
         <div><label>Аркан Варфрейма (Слот 2)</label><input id="edit_arcane_frame2" list="arcane_frame_list" placeholder="Arcane Guardian..."></div>
       </div>
@@ -360,7 +315,6 @@
         <div class="capacity-bar-bg"><div class="capacity-bar-fill capacity-ok" id="cap_frame_bar" style="width: 0%;"></div></div>
       </div>
     </div>
-
     <div class="itab-panel" id="itab-weapon">
       <div style="background:var(--panel3); padding:12px; border-radius:8px; margin-bottom:15px; border-left: 3px solid var(--ok);">
         <h4 style="color:var(--ok); font-size:13px; margin:0 0 10px 0;">🤖 Умный авто-оптимизатор</h4>
@@ -369,38 +323,24 @@
           <div class="full"><button class="btn-auto" style="width:100%; background:var(--ok); color:#000;" onclick="autoOptimizeBuild()">✨ Собрать лучший билд</button></div>
         </div>
       </div>
-
       <div class="grid2">
         <div class="full"><label>Основное</label><div class="field-with-btn"><input id="edit_prim" placeholder="Strun Prime"><button class="btn-pick" onclick="openPicker('primary')">Выбрать</button></div><div class="field-with-btn" style="margin-top:5px;"><input id="edit_arcane_primary" list="arcane_weapon_list" placeholder="Аркан: Primary Merciless..." style="width:100%;"><button class="btn-auto" onclick="autoPickArcanes('primary')">🎲 Авто</button></div></div>
         <div class="full"><label>Вторичное</label><div class="field-with-btn"><input id="edit_sec" placeholder="Laetum"><button class="btn-pick" onclick="openPicker('secondary')">Выбрать</button></div><div class="field-with-btn" style="margin-top:5px;"><input id="edit_arcane_secondary" list="arcane_weapon_list" placeholder="Аркан: Secondary Encumber..." style="width:100%;"><button class="btn-auto" onclick="autoPickArcanes('secondary')">🎲 Авто</button></div></div>
         <div class="full"><label>Ближний бой</label><div class="field-with-btn"><input id="edit_melee" placeholder="Kronen Prime"><button class="btn-pick" onclick="openPicker('melee')">Выбрать</button></div><div class="field-with-btn" style="margin-top:5px;"><input id="edit_arcane_melee" list="arcane_weapon_list" placeholder="Аркан: Melee Influence..." style="width:100%;"><button class="btn-auto" onclick="autoPickArcanes('melee')">🎲 Авто</button></div></div>
       </div>
-      
-      <div class="mod-group">
-        <h5>Моды основного <span><button class="btn-auto" onclick="autoPickMods('primary')">🎲 Авто</button><button class="btn-pick" onclick="openModPicker('primary')">+</button><button class="btn-sm btn-red" onclick="clearAllMods('primary')">❌</button></span></h5>
-        <div class="mod-tags" id="tags_primary"></div>
-      </div>
-      <div class="mod-group">
-        <h5>Моды вторичного <span><button class="btn-auto" onclick="autoPickMods('secondary')">🎲 Авто</button><button class="btn-pick" onclick="openModPicker('secondary')">+</button><button class="btn-sm btn-red" onclick="clearAllMods('secondary')">❌</button></span></h5>
-        <div class="mod-tags" id="tags_secondary"></div>
-      </div>
-      <div class="mod-group">
-        <h5>Моды ближнего боя <span><button class="btn-auto" onclick="autoPickMods('melee')">🎲 Авто</button><button class="btn-pick" onclick="openModPicker('melee')">+</button><button class="btn-sm btn-red" onclick="clearAllMods('melee')">❌</button></span></h5>
-        <div class="mod-tags" id="tags_melee"></div>
-      </div>
-
+      <div class="mod-group"><h5>Моды основного <span><button class="btn-auto" onclick="autoPickMods('primary')">🎲 Авто</button><button class="btn-pick" onclick="openModPicker('primary')">+</button><button class="btn-sm btn-red" onclick="clearAllMods('primary')">❌</button></span></h5><div class="mod-tags" id="tags_primary"></div></div>
+      <div class="mod-group"><h5>Моды вторичного <span><button class="btn-auto" onclick="autoPickMods('secondary')">🎲 Авто</button><button class="btn-pick" onclick="openModPicker('secondary')">+</button><button class="btn-sm btn-red" onclick="clearAllMods('secondary')">❌</button></span></h5><div class="mod-tags" id="tags_secondary"></div></div>
+      <div class="mod-group"><h5>Моды ближнего боя <span><button class="btn-auto" onclick="autoPickMods('melee')">🎲 Авто</button><button class="btn-pick" onclick="openModPicker('melee')">+</button><button class="btn-sm btn-red" onclick="clearAllMods('melee')">❌</button></span></h5><div class="mod-tags" id="tags_melee"></div></div>
       <div class="capacity-container" id="cap_weapon_box">
         <div class="capacity-header"><span>Вместимость (Оружие)</span><span id="cap_weapon_text">0 / 60</span></div>
         <div class="capacity-bar-bg"><div class="capacity-bar-fill capacity-ok" id="cap_weapon_bar" style="width: 0%;"></div></div>
       </div>
-
       <div class="calc-box" style="margin-top:15px; border-color:var(--accent2);">
         <h4 style="color:var(--accent2); margin-top:0; font-size:14px;">💰 Стоимость сборки (Warframe Market)</h4>
         <div class="meg-trade-toolbar" id="build_market_toolbar"></div>
         <button class="btn-auto" style="width:100%;" onclick="updateBuildMarketSummary()">🔄 Обновить цены на рынке</button>
       </div>
     </div>
-
     <div class="itab-panel" id="itab-shards">
       <div style="margin-bottom:15px; text-align:center;"><button class="btn-auto" onclick="autoPickShards()" style="width:100%;">🎲 Авто-подбор осколков под роль</button></div>
       <div class="calc-grid" style="grid-template-columns: repeat(5, 1fr); gap: 8px;">
@@ -411,7 +351,6 @@
         <div><label>Осколок 5</label><select id="edit_shard5" class="shard-select"></select></div>
       </div>
     </div>
-
     <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">
       <button onclick="closeModal('modal_edit')">Отмена</button>
       <button onclick="copyBuildToChat()">📋 Копировать для чата</button>
@@ -424,10 +363,7 @@
 <!-- МОДАЛКА ХЕЛМИНТА -->
 <div class="modal-bg" id="modal_helminth">
   <div class="modal">
-    <div style="display:flex;justify-content:space-between;margin-bottom:15px">
-      <h2 style="margin:0">Справочник Хелминта</h2>
-      <button class="btn-sm" onclick="closeModal('modal_helminth')">X</button>
-    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:15px"><h2 style="margin:0">Справочник Хелминта</h2><button class="btn-sm" onclick="closeModal('modal_helminth')">X</button></div>
     <div class="pick-list" id="helminth_list_container" style="background:transparent; padding:0; border:none;"></div>
   </div>
 </div>
@@ -444,39 +380,15 @@
   <div class="modal">
     <div style="display:flex;justify-content:space-between;margin-bottom:12px"><h2 style="margin:0">Выбор модов</h2><button class="btn-sm" onclick="closeModal('modal_mods')">X</button></div>
     <input type="text" id="mod_search" placeholder="Поиск по имени..." oninput="renderModPicker()" style="width:100%;margin-bottom:8px">
-    <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--dim);margin-bottom:10px;cursor:pointer">
-      <input type="checkbox" id="mod_only_relevant" checked onchange="renderModPicker()"> Только релевантные слоту
-    </label>
+    <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--dim);margin-bottom:10px;cursor:pointer"><input type="checkbox" id="mod_only_relevant" checked onchange="renderModPicker()"> Только релевантные слоту</label>
     <div class="pick-list" id="mod_list"></div>
   </div>
 </div>
 
 <!-- Datalists -->
-<datalist id="helminth_list">
-  <option value="Roar"><option value="Eclipse"><option value="Gloom"><option value="Nourish"><option value="Dispensary"><option value="Pillage"><option value="Terrify"><option value="Silence"><option value="Breach Surge"><option value="Shooting Gallery"><option value="Xata's Whisper"><option value="Thermal Sunder"><option value="Energized Munitions"><option value="Spectrorage">
-</datalist>
-<datalist id="arcane_frame_list">
-  <option value="Arcane Energize"><option value="Arcane Grace"><option value="Arcane Guardian"><option value="Arcane Avenger"><option value="Molt Augmented"><option value="Molt Efficiency"><option value="Arcane Blessing"><option value="Arcane Steadfast">
-</datalist>
-<datalist id="arcane_weapon_list">
-  <option value="Primary Merciless"><option value="Primary Frostbite"><option value="Primary Dexterity"><option value="Secondary Merciless"><option value="Secondary Encumber"><option value="Secondary Fortifier"><option value="Melee Influence"><option value="Melee Exposure"><option value="Melee Animosity">
-</datalist>
-
-<!-- Данные -->
-<script src="arcanes_data.js"></script>
-<script src="relics_data.js"></script>
-<script src="primary_data.js"></script>
-<script src="secondary_data.js"></script>
-<script src="melee_data.js"></script>
-<script src="sentinelweapons_data.js"></script>
-<script src="archgun_data.js"></script>
-<script src="archmelee_data.js"></script>
-<script src="amps_data.js"></script>
-<script src="necramech_data.js"></script>
-<script src="warframes_data.js"></script>
-<script src="pets_data.js"></script>
-<script src="sentinels_data.js"></script>
-<script src="mods_data.js"></script>
+<datalist id="helminth_list"><option value="Roar"><option value="Eclipse"><option value="Gloom"><option value="Nourish"><option value="Dispensary"><option value="Pillage"><option value="Terrify"><option value="Silence"><option value="Breach Surge"><option value="Shooting Gallery"><option value="Xata's Whisper"><option value="Thermal Sunder"><option value="Energized Munitions"><option value="Spectrorage"></datalist>
+<datalist id="arcane_frame_list"><option value="Arcane Energize"><option value="Arcane Grace"><option value="Arcane Guardian"><option value="Arcane Avenger"><option value="Molt Augmented"><option value="Molt Efficiency"><option value="Arcane Blessing"><option value="Arcane Steadfast"></datalist>
+<datalist id="arcane_weapon_list"><option value="Primary Merciless"><option value="Primary Frostbite"><option value="Primary Dexterity"><option value="Secondary Merciless"><option value="Secondary Encumber"><option value="Secondary Fortifier"><option value="Melee Influence"><option value="Melee Exposure"><option value="Melee Animosity"></datalist>
 
 <!-- Логика. Порядок важен. -->
 <script src="js/state.js"></script>
@@ -495,7 +407,9 @@
 <script src="js/optimizer.js"></script>
 <script src="js/operator.js"></script>
 <script src="js/market.js"></script>
-<script src="js/extensions.js"></script> <!-- НОВЫЙ СКРИПТ -->
+<script src="js/extensions.js"></script>
+<script src="js/relics.js"></script>
+<script src="js/theme.js"></script>
 <script src="js/init.js"></script>
 </body>
 </html>
